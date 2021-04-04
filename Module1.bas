@@ -170,10 +170,10 @@ Sub test()
                     
                 End If
             
+            Next
+            
             ReDim Preserve strarr_builder(0 To UBound(strarr_builder) + 1)
             strarr_builder(UBound(strarr_builder)) = func_getTagStart("tr") & Join(strarr_builder_line, "") & func_getTagEnd("tr")
-            
-            Next
         
         End If
         
