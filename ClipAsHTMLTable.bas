@@ -35,6 +35,7 @@ Sub ClipAsHTMLTable()
     Dim clctn_hiddenCols As New Collection
     Dim clctn_mergedRowNums As New Collection
     Dim clctn_mergedColNums As New Collection
+    Dim dict_tag_properties As Object
     
     Dim lng_startOfRowPre As Long
     Dim lng_lastOfRowPre As Long
@@ -53,13 +54,17 @@ Sub ClipAsHTMLTable()
     
     '初期化
     ReDim strarr_builder(0 To 0)
+    Set dict_tag_properties = Nothing
+    Set dict_tag_properties = CreateObject("Scripting.Dictionary")
+    dict_tag_properties.Add Key:="border", Item:=CStr(1)
+    
     
     '<非表示行、非表示列の解析>-----------------------
     
     lng_startOfRowPre = range_selection.Row
-    lng_lastOfRowPre = lng_startOfRow + range_selection.Rows.Count - 1
+    lng_lastOfRowPre = lng_startOfRowPre + range_selection.Rows.Count - 1
     lng_startOfColPre = range_selection.Column
-    lng_lastOfColPre = lng_startOfCol + range_selection.Columns.Count - 1
+    lng_lastOfColPre = lng_startOfColPre + range_selection.Columns.Count - 1
     
     '非表示行番号のコレクションを作成
     For lng_rowIdx = lng_startOfRowPre To lng_lastOfRowPre
@@ -79,7 +84,7 @@ Sub ClipAsHTMLTable()
     '----------------------</非表示行、非表示列の解析>
     
     '<table> タグ
-    strarr_builder(UBound(strarr_builder)) = func_getTagStart("table")
+    strarr_builder(UBound(strarr_builder)) = func_getTagStart("table", dict_tag_properties)
     
     '表示されていること(非表示ではないこと)
     'mergearea を持っている場合は、非表示の行、列、コレクション番号を差っ引く
@@ -137,7 +142,6 @@ Sub ClipAsHTMLTable()
                         If (rng_cellOfInterest.Row = clctn_mergedRowNums(1)) Then '注視しているセルが最も上の場合
                             If (rng_cellOfInterest.Column = clctn_mergedColNums(1)) Then '注視しているセルが最も左の場合
                             
-                                Dim dict_tag_properties As Object
                                 Set dict_tag_properties = Nothing
                                 
                                 If (1 < clctn_mergedRowNums.Count) Or (1 < clctn_mergedColNums.Count) Then ' 結合セルが 2 つ以上ある場合
@@ -173,7 +177,7 @@ Sub ClipAsHTMLTable()
             Next
             
             ReDim Preserve strarr_builder(0 To UBound(strarr_builder) + 1)
-            strarr_builder(UBound(strarr_builder)) = func_getTagStart("tr") & Join(strarr_builder_line, "") & func_getTagEnd("tr")
+            strarr_builder(UBound(strarr_builder)) = String(int_indent, " ") & func_getTagStart("tr") & Join(strarr_builder_line, "") & func_getTagEnd("tr")
         
         End If
         
@@ -308,4 +312,8 @@ Private Sub GetCB(ByRef str As String)
 End Sub
 
 '------------------------------------------</クリップボード操作>
+
+
+
+
 
