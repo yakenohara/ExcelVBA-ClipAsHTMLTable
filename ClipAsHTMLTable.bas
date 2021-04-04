@@ -1,4 +1,4 @@
-Attribute VB_Name = "Module1"
+Attribute VB_Name = "ClipAsHTMLTable"
 '<License>------------------------------------------------------------
 '
 ' Copyright (c) 2021 Shinnosuke Yakenohara
@@ -19,7 +19,7 @@ Attribute VB_Name = "Module1"
 '-----------------------------------------------------------</License>
 
 
-Sub test()
+Sub ClipAsHTMLTable()
 
     '<定数>------------------------------------------------------------------------------------------
     
@@ -187,8 +187,7 @@ Sub test()
     '配列の文字列化
     str_tmp = Join(strarr_builder, str_nlineCode)
     
-    Debug.Print str_tmp
-    SetCB str_tmp
+    SetCB str_tmp ' クリップボードに貼り付け
     
 End Sub
 
@@ -309,45 +308,4 @@ Private Sub GetCB(ByRef str As String)
 End Sub
 
 '------------------------------------------</クリップボード操作>
-
-Sub aaa()
-'    Dim clctn_hiddenRows As New Collection
-'    clctn_hiddenRows.Add Item:=2, Key:=CStr(2)
-'    'Debug.Print clctn_hiddenRows.Count
-'    For Each kkk In clctn_hiddenRows.Keys
-'        Debug.Print kkk
-'    Next
-'    Debug.Print func_isInCollection("2", clctn_hiddenRows)
-'    Debug.Print Application.ActiveSheet.Cells(4, 4).MergeArea.Columns.Count
-'    Debug.Print Application.ActiveSheet.Cells(4, 4).MergeArea.Row
-
-    Dim dict_view_setting As Object
-    Set dict_view_setting = CreateObject("Scripting.Dictionary")
-
-    With dict_view_setting
-        .Add "prop_int_zoom_level", "int_tmp_val"
-        .Add "prop_bool_top_left_option_enabled", "SetSameViewFormMod.chkbx_top_left.Value"
-        .Add "prop_str_top_left_address_of_view", "SetSameViewFormMod.txtbx_top_left_address_of_view.Value"
-        .Add "prop_str_range_address_to_select", "SetSameViewFormMod.txtbx_range_address_to_select.Value"
-        .Add "prop_str_sheet_name_to_activate", "SetSameViewFormMod.cmbbx_sheet_name_to_activate.Value"
-        .Add "prop_bool_minimize_ribbon_option_enabled", "SetSameViewFormMod.chkbx_minimize_ribbon.Value"
-        .Add "prop_bool_all_books_option_enabled", "SetSameViewFormMod.chkbx_all_books.Value"
-    End With
-    x = bbb(dict_view_setting)
-End Sub
-
-Private Function bbb(Optional ByVal dict_view_setting As Object = Nothing)
-    For Each vvv In dict_view_setting
-        Debug.Print "key:" & vvv & ", val:" & dict_view_setting.Item(vvv)
-    Next vvv
-End Function
-
-
-
-
-
-
-
-
-
 
