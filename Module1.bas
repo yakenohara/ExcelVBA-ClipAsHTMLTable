@@ -104,7 +104,7 @@ Sub test()
                         ' 表示されている単一セルとみなす(= <td> 要素となるセルとみなす)
                         If isFirstCol Then ' <tr> 要素内の最初の <td> となるなら
                             isFirstCol = False
-                        Else ' <tr> 要素内の最初の <td> となるなら
+                        Else ' <tr> 要素内の2つめ以降の <td> となるなら
                             ReDim Preserve strarr_builder_line(0 To UBound(strarr_builder_line) + 1)
                         End If
                         strarr_builder_line(UBound(strarr_builder_line)) = func_getTagStart("td") & rng_cellOfInterest.Text & func_getTagEnd("td") '<td> 要素の定義
@@ -118,7 +118,7 @@ Sub test()
                         lng_mergeRowStart = rng_cellOfInterest.MergeArea.Cells(1, 1).Row '結合セルの行開始番号
                         lng_mergeRowEnd = lng_mergeRowStart + rng_cellOfInterest.MergeArea.Rows.Count - 1 '結合セルの行終了番号
                         For lng_rowCollector = lng_mergeRowStart To lng_mergeRowEnd
-                            If func_isInCollection(CStr(lng_rowCollector), clctn_hiddenRows) Then ' 非表示行ではない場合
+                            If Not func_isInCollection(CStr(lng_rowCollector), clctn_hiddenRows) Then ' 非表示行ではない場合
                                 clctn_mergedRowNums.Add Item:=lng_rowCollector, Key:=CStr(lng_rowCollector) '行番号コレクションに追加
                             End If
                         Next
@@ -126,16 +126,16 @@ Sub test()
                         '列番号コレクションの作成
                         Set clctn_mergedColNums = Nothing
                         lng_mergeColStart = rng_cellOfInterest.MergeArea.Cells(1, 1).Column '結合セルの列開始番号
-                        lng_mergeColEnd = lng_mergeColStart + rng_cellOfInterest.MergeArea.Rows.Count - 1 '結合セルの列終了番号
+                        lng_mergeColEnd = lng_mergeColStart + rng_cellOfInterest.MergeArea.Columns.Count - 1 '結合セルの列終了番号
                         For lng_colCollector = lng_mergeColStart To lng_mergeColEnd
-                            If func_isInCollection(CStr(lng_colCollector), clctn_hiddenCols) Then ' 非表示列ではない場合
+                            If Not func_isInCollection(CStr(lng_colCollector), clctn_hiddenCols) Then ' 非表示列ではない場合
                                 clctn_mergedColNums.Add Item:=lng_colCollector, Key:=CStr(lng_colCollector) '列番号コレクションに追加
                             End If
                         Next
                         
                         ' 注視しているセル位置が左上かどうか
-                        If (rng_cellOfInterest.Cells(1, 1).Row = clctn_mergedRowNums(1)) Then '注視しているセルが最も上の場合
-                            If (rng_cellOfInterest.Cells(1, 1).Column = clctn_mergedColNums(1)) Then '注視しているセルが最も左の場合
+                        If (rng_cellOfInterest.Row = clctn_mergedRowNums(1)) Then '注視しているセルが最も上の場合
+                            If (rng_cellOfInterest.Column = clctn_mergedColNums(1)) Then '注視しているセルが最も左の場合
                             
                                 Dim dict_tag_properties As Object
                                 Set dict_tag_properties = Nothing
@@ -157,11 +157,11 @@ Sub test()
                                 ' <td> 要素とみなす
                                 If isFirstCol Then ' <tr> 要素内の最初の <td> となるなら
                                     isFirstCol = False
-                                Else ' <tr> 要素内の最初の <td> となるなら
+                                Else ' <tr> 要素内の2つめ以降の <td> となるなら
                                     ReDim Preserve strarr_builder_line(0 To UBound(strarr_builder_line) + 1)
                                 End If
                                 
-                                strarr_builder_line(UBound(strarr_builder_line)) = func_getTagStart("td", dict_tag_properties) & rng_cellOfInterest.Text & func_getTagEnd("td") '<td> 要素の定義
+                                strarr_builder_line(UBound(strarr_builder_line)) = func_getTagStart("td", dict_tag_properties) & rng_cellOfInterest.MergeArea.Cells(1, 1).Text & func_getTagEnd("td") '<td> 要素の定義
                                 
                             End If
                         End If
@@ -192,19 +192,41 @@ Sub test()
     
 End Sub
 
-Private Function func_getTagStart(ByVal str_tagname, Optional ByRef strclctn_properties As Collection = Nothing) As String
+Private Function func_getTagStart(ByVal str_tagname, Optional ByRef dict_properties As Object = Nothing) As String
     Dim str_properties As String
-    If strclctn_properties Is Nothing Then ' プロパティが指定されている場合
+    Dim strarr_builder() As String
+    Dim isFirst As Boolean
+    
+    isFirst = True
+    
+    If dict_properties Is Nothing Then ' プロパティが指定されていない場合
         
-    Else
         str_properties = ""
+    
+    Else ' プロパティが指定されている場合
+        
+        For Each str_keyName In dict_properties
+            
+            If isFirst Then ' ループ 1回目の場合
+                ReDim strarr_builder(0 To 0)
+                isFirst = False
+            Else ' ループ 2回目以降の場合
+                ReDim Preserve strarr_builder(0 To UBound(strarr_builder) + 1)
+            End If
+            
+            strarr_builder(UBound(strarr_builder)) = "" & str_keyName & "=""" & dict_properties.Item(str_keyName) & """"
+            
+        Next str_keyName
+        
+        str_properties = " " & Join(strarr_builder, " ")
+        
     End If
     
-    func_getTagStart = "<" + str_tagname + ">"
+    func_getTagStart = "<" & str_tagname & str_properties & ">"
 End Function
 
 Private Function func_getTagEnd(ByVal str_tagname) As String
-    func_getTagEnd = "<" + "/" + str_tagname + ">"
+    func_getTagEnd = "<" & "/" & str_tagname & ">"
 End Function
 
 '
@@ -319,6 +341,12 @@ Private Function bbb(Optional ByVal dict_view_setting As Object = Nothing)
         Debug.Print "key:" & vvv & ", val:" & dict_view_setting.Item(vvv)
     Next vvv
 End Function
+
+
+
+
+
+
 
 
 
